@@ -40,10 +40,6 @@
  */
 
 namespace PHPSQLParser\builders;
-require_once dirname(__FILE__) . '/InsertBuilder.php';
-require_once dirname(__FILE__) . '/ValuesBuilder.php';
-require_once dirname(__FILE__) . '/SelectStatementBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
 
 /**
  * This class implements the builder for the whole Insert statement. You can overwrite
@@ -69,12 +65,20 @@ class InsertStatementBuilder implements Builder {
         $builder = new SelectStatementBuilder();
         return $builder->build($parsed);
     }
-
+    
+    protected function buildSET($parsed) {
+        $builder = new SetBuilder();
+        return $builder->build($parsed);
+    }
+    
     public function build(array $parsed) {
         // TODO: are there more than one tables possible (like [INSERT][1])
         $sql = $this->buildINSERT($parsed['INSERT']);
         if (isset($parsed['VALUES'])) {
             $sql .= ' ' . $this->buildVALUES($parsed['VALUES']);
+        }
+        if (isset($parsed['SET'])) {
+            $sql .= ' ' . $this->buildSET($parsed['SET']);
         }
         if (isset($parsed['SELECT'])) {
             $sql .= ' ' . $this->buildSELECT($parsed);

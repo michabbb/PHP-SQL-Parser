@@ -41,8 +41,6 @@
 
 namespace PHPSQLParser\processors;
 
-require_once dirname(__FILE__) . '/AbstractProcessor.php';
-
 /**
  * This class processes the LIMIT statements.
  * 
@@ -58,7 +56,16 @@ class LimitProcessor extends AbstractProcessor {
 
         $comma = -1;
         $exchange = false;
-
+        
+        $comments = array();
+        
+        foreach ($tokens as &$token) {
+            if ($this->isCommentToken($token)) {
+                 $comments[] = parent::processComment($token);
+                 $token = '';
+            }
+        }
+        
         for ($i = 0; $i < count($tokens); ++$i) {
             $trim = strtoupper(trim($tokens[$i]));
             if ($trim === ",") {
@@ -88,7 +95,11 @@ class LimitProcessor extends AbstractProcessor {
             }
         }
 
-        return array('offset' => trim($offset), 'rowcount' => trim($rowcount));
+        $return = array('offset' => trim($offset), 'rowcount' => trim($rowcount));
+        if (count($comments)) {
+            $return['comments'] = $comments;
+        }
+        return $return;
     }
 }
 ?>

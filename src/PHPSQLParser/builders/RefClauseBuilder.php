@@ -31,33 +31,24 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * @author    André Rothe <andre.rothe@phosco.info>
  * @copyright 2010-2014 Justin Swanhart and André Rothe
  * @license   http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
  * @version   SVN: $Id$
- * 
+ *
  */
 
 namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/ColumnReferenceBuilder.php';
-require_once dirname(__FILE__) . '/OperatorBuilder.php';
-require_once dirname(__FILE__) . '/ConstantBuilder.php';
-require_once dirname(__FILE__) . '/FunctionBuilder.php';
-require_once dirname(__FILE__) . '/InListBuilder.php';
-require_once dirname(__FILE__) . '/SelectBracketExpressionBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
-
 /**
- * This class implements the references clause within a JOIN. 
+ * This class implements the references clause within a JOIN.
  * You can overwrite all functions to achieve another handling.
  *
  * @author  André Rothe <andre.rothe@phosco.info>
  * @license http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
- *  
+ *
  */
 class RefClauseBuilder implements Builder {
 
@@ -91,6 +82,16 @@ class RefClauseBuilder implements Builder {
         return $builder->build($parsed);
     }
 
+    protected function buildColumnList($parsed) {
+        $builder = new ColumnListBuilder();
+        return $builder->build($parsed);
+    }
+
+    protected function buildSubQuery($parsed) {
+        $builder = new SubQueryBuilder();
+        return $builder->build($parsed);
+    }
+
     public function build(array $parsed) {
         if ($parsed === false) {
             return '';
@@ -104,6 +105,8 @@ class RefClauseBuilder implements Builder {
             $sql .= $this->buildFunction($v);
             $sql .= $this->buildBracketExpression($v);
             $sql .= $this->buildInList($v);
+            $sql .= $this->buildColumnList($v);
+            $sql .= $this->buildSubQuery($v);
 
             if ($len == strlen($sql)) {
                 throw new UnableToCreateSQLException('expression ref_clause', $k, $v, 'expr_type');

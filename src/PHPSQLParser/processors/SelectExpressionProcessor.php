@@ -33,24 +33,20 @@
 namespace PHPSQLParser\processors;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once(dirname(__FILE__) . '/AbstractProcessor.php');
-require_once(dirname(__FILE__) . '/ExpressionListProcessor.php');
-require_once(dirname(__FILE__) . '/../utils/ExpressionType.php');
-
 /**
- * 
+ *
  * This class processes the SELECT expressions.
- * 
+ *
  * @author arothe
- * 
+ *
  */
 class SelectExpressionProcessor extends AbstractProcessor {
 
     protected function processExpressionList($unparsed) {
-        $processor = new ExpressionListProcessor();
+        $processor = new ExpressionListProcessor($this->options);
         return $processor->process($unparsed);
     }
-        
+
     /**
      * This fuction processes each SELECT clause.
      * We determine what (if any) alias
@@ -64,8 +60,8 @@ class SelectExpressionProcessor extends AbstractProcessor {
         }
 
         /*
-         * Determine if there is an explicit alias after the AS clause. 
-         * If AS is found, then the next non-whitespace token is captured as the alias. 
+         * Determine if there is an explicit alias after the AS clause.
+         * If AS is found, then the next non-whitespace token is captured as the alias.
          * The tokens after (and including) the AS are removed.
          */
         $base_expr = "";
@@ -109,8 +105,8 @@ class SelectExpressionProcessor extends AbstractProcessor {
             $alias['no_quotes'] = $this->revokeQuotation($alias['name']);
             $alias['name'] = trim($alias['name']);
             $alias['base_expr'] = trim($alias['base_expr']);
-        }    
-        
+        }
+
         $stripped = $this->processExpressionList($stripped);
 
         // TODO: the last part can also be a comment, don't use array_pop
@@ -138,7 +134,7 @@ class SelectExpressionProcessor extends AbstractProcessor {
         }
 
         $base_expr = $expression;
-        
+
         // TODO: this is always done with $stripped, how we do it twice?
         $processed = $this->processExpressionList($tokens);
 

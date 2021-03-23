@@ -43,15 +43,6 @@ namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/OrderByAliasBuilder.php';
-require_once dirname(__FILE__) . '/OrderByColumnReferenceBuilder.php';
-require_once dirname(__FILE__) . '/OrderByExpressionBuilder.php';
-require_once dirname(__FILE__) . '/OrderByBracketExpressionBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
-require_once dirname(__FILE__) . '/OrderByFunctionBuilder.php';
-require_once dirname(__FILE__) . '/OrderByReservedBuilder.php';
-
 /**
  * This class implements the builder for the ORDER-BY clause. 
  * You can overwrite all functions to achieve another handling.
@@ -92,6 +83,11 @@ class OrderByBuilder implements Builder {
         return $builder->build($parsed);
     }
     
+    protected function buildPosition($parsed) {
+        $builder = new PositionBuilder();
+        return $builder->build($parsed);
+    }
+
     public function build(array $parsed) {
         $sql = "";
         foreach ($parsed as $k => $v) {
@@ -102,6 +98,7 @@ class OrderByBuilder implements Builder {
             $sql .= $this->buildExpression($v);
             $sql .= $this->buildBracketExpression($v);
             $sql .= $this->buildReserved($v);
+            $sql .= $this->buildPosition($v);
             
             if ($len == strlen($sql)) {
                 throw new UnableToCreateSQLException('ORDER', $k, $v, 'expr_type');

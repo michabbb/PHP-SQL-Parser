@@ -33,10 +33,6 @@
 namespace PHPSQLParser\processors;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once(dirname(__FILE__) . '/AbstractProcessor.php');
-require_once(dirname(__FILE__) . '/IndexColumnListProcessor.php');
-require_once(dirname(__FILE__) . '/../utils/ExpressionType.php');
-
 /**
  *
  * This class processes the reference definition part of the CREATE TABLE statements.
@@ -158,7 +154,7 @@ class ReferenceDefinitionProcessor extends AbstractProcessor {
                 case 'REFERENCES':
                     if ($upper[0] === '(' && substr($upper, -1) === ')') {
                         # index_col_name list
-                        $processor = new IndexColumnListProcessor();
+                        $processor = new IndexColumnListProcessor($this->options);
                         $cols = $processor->process($this->removeParenthesisFromStart($trim));
                         $expr['sub_tree'][] = array('expr_type' => ExpressionType::COLUMN_LIST, 'base_expr' => $trim,
                                                     'sub_tree' => $cols);

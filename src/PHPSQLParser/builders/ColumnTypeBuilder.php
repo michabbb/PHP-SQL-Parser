@@ -43,14 +43,6 @@ namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/ReservedBuilder.php';
-require_once dirname(__FILE__) . '/ColumnTypeBracketExpressionBuilder.php';
-require_once dirname(__FILE__) . '/DataTypeBuilder.php';
-require_once dirname(__FILE__) . '/DefaultValueBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-
 /**
  * This class implements the builder for the column type statement part of CREATE TABLE. 
  * You can overwrite all functions to achieve another handling.
@@ -80,7 +72,14 @@ class ColumnTypeBuilder implements Builder {
         $builder = new DefaultValueBuilder();
         return $builder->build($parsed);
     }
-    
+
+    protected function buildCharacterSet($parsed) {
+        if ($parsed['expr_type'] !== ExpressionType::CHARSET) {
+            return "";
+        }
+        return $parsed['base_expr'];
+    }
+
     public function build(array $parsed) {
         if ($parsed['expr_type'] !== ExpressionType::COLUMN_TYPE) {
             return "";
@@ -92,7 +91,8 @@ class ColumnTypeBuilder implements Builder {
             $sql .= $this->buildColumnTypeBracketExpression($v);
             $sql .= $this->buildReserved($v);
             $sql .= $this->buildDefaultValue($v);
-            
+            $sql .= $this->buildCharacterSet($v);
+
             if ($len == strlen($sql)) {
                 throw new UnableToCreateSQLException('CREATE TABLE column-type subtree', $k, $v, 'expr_type');
             }

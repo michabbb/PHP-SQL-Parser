@@ -40,14 +40,6 @@
  */
 
 namespace PHPSQLParser\builders;
-require_once dirname(__FILE__) . '/LimitBuilder.php';
-require_once dirname(__FILE__) . '/SelectBuilder.php';
-require_once dirname(__FILE__) . '/FromBuilder.php';
-require_once dirname(__FILE__) . '/WhereBuilder.php';
-require_once dirname(__FILE__) . '/GroupByBuilder.php';
-require_once dirname(__FILE__) . '/HavingBuilder.php';
-require_once dirname(__FILE__) . '/OrderByBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
 
 /**
  * This class implements the builder for the whole Select statement. You can overwrite
@@ -93,6 +85,16 @@ class SelectStatementBuilder implements Builder {
         $builder = new LimitBuilder();
         return $builder->build($parsed);
     }
+    
+    protected function buildUNION($parsed) {
+    	$builder = new UnionStatementBuilder();
+    	return $builder->build($parsed);
+    }
+    
+    protected function buildUNIONALL($parsed) {
+    	$builder = new UnionAllStatementBuilder();
+    	return $builder->build($parsed);
+    }
 
     public function build(array $parsed) {
         $sql = "";
@@ -116,6 +118,12 @@ class SelectStatementBuilder implements Builder {
         }
         if (isset($parsed['LIMIT'])) {
             $sql .= " " . $this->buildLIMIT($parsed['LIMIT']);
+        }       
+        if (isset($parsed['UNION'])) {
+            $sql .= " " . $this->buildUNION($parsed);
+        }
+        if (isset($parsed['UNION ALL'])) {
+        	$sql .= " " . $this->buildUNIONALL($parsed);
         }
         return $sql;
     }

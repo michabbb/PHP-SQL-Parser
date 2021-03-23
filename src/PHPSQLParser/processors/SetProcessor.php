@@ -33,21 +33,17 @@
 namespace PHPSQLParser\processors;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/AbstractProcessor.php';
-require_once dirname(__FILE__) . '/ExpressionListProcessor.php';
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-
 /**
- * 
+ *
  * This class processes the SET statements.
- * 
+ *
  * @author arothe
- * 
+ *
  */
 class SetProcessor extends AbstractProcessor {
 
     protected function processExpressionList($tokens) {
-        $processor = new ExpressionListProcessor();
+        $processor = new ExpressionListProcessor($this->options);
         return $processor->process($tokens);
     }
 
@@ -57,9 +53,9 @@ class SetProcessor extends AbstractProcessor {
      */
     protected function processAssignment($base_expr) {
         $assignment = $this->processExpressionList($this->splitSQLIntoTokens($base_expr));
-        
+
         // TODO: if the left side of the assignment is a reserved keyword, it should be changed to colref
-        
+
         return array('expr_type' => ExpressionType::EXPRESSION, 'base_expr' => trim($base_expr),
                      'sub_tree' => (empty($assignment) ? false : $assignment));
     }

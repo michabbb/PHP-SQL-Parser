@@ -42,13 +42,6 @@
 namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/PositionBuilder.php';
-require_once dirname(__FILE__) . '/ColumnReferenceBuilder.php';
-require_once dirname(__FILE__) . '/FunctionBuilder.php';
-require_once dirname(__FILE__) . '/GroupByAliasBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
-
 /**
  * This class implements the builder for the GROUP-BY clause. 
  * You can overwrite all functions to achieve another handling.
@@ -78,6 +71,11 @@ class GroupByBuilder implements Builder {
         $builder = new GroupByAliasBuilder();
         return $builder->build($parsed);
     }
+    
+    protected function buildGroupByExpression($parsed) {
+    	$builder = new GroupByExpressionBuilder();
+        return $builder->build($parsed);
+    }
 
     public function build(array $parsed) {
         $sql = "";
@@ -86,8 +84,9 @@ class GroupByBuilder implements Builder {
             $sql .= $this->buildColRef($v);
             $sql .= $this->buildPosition($v);
             $sql .= $this->buildFunction($v);
+            $sql .= $this->buildGroupByExpression($v);
             $sql .= $this->buildGroupByAlias($v);
-
+            
             if ($len == strlen($sql)) {
                 throw new UnableToCreateSQLException('GROUP', $k, $v, 'expr_type');
             }

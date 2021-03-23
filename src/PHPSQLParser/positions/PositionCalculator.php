@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  * @author    André Rothe <andre.rothe@phosco.info>
- * @copyright 2010-2014 Justin Swanhart and André Rothe
+ * @copyright 2010-2015 Justin Swanhart and André Rothe
  * @license   http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
  * @version   SVN: $Id$
  * 
@@ -44,10 +44,6 @@ namespace PHPSQLParser\positions;
 use PHPSQLParser\utils\PHPSQLParserConstants;
 use PHPSQLParser\exceptions\UnableToCalculatePositionException;
 use PHPSQLParser\utils\ExpressionType;
-
-require_once dirname(__FILE__) . '/../utils/PHPSQLParserConstants.php';
-require_once dirname(__FILE__) . '/../exceptions/UnableToCalculatePositionException.php';
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
 
 /**
  * This class implements the calculator for the string positions of the 
@@ -93,7 +89,9 @@ class PositionCalculator {
                                                 ExpressionType::SUBPARTITION_MIN_ROWS, ExpressionType::SUBPARTITION,
                                                 ExpressionType::SUBPARTITION_HASH, ExpressionType::SUBPARTITION_COUNT,
                                                 ExpressionType::CHARSET, ExpressionType::ENGINE, ExpressionType::QUERY,
-                                                ExpressionType::INDEX_ALGORITHM, ExpressionType::INDEX_LOCK);
+                                                ExpressionType::INDEX_ALGORITHM, ExpressionType::INDEX_LOCK,
+    											ExpressionType::SUBQUERY_FACTORING, ExpressionType::CUSTOM_FUNCTION
+    );
 
     /**
      * Constructor.
@@ -105,7 +103,7 @@ class PositionCalculator {
     }
 
     protected function printPos($text, $sql, $charPos, $key, $parsed, $backtracking) {
-        if (!isset($_ENV['DEBUG'])) {
+        if (!isset($_SERVER['DEBUG'])) {
             return;
         }
 
@@ -135,6 +133,8 @@ class PositionCalculator {
         while (true) {
 
             $pos = strpos($sql, $value, $offset);
+            // error_log("pos:$pos value:$value sql:$sql");
+            
             if ($pos === false) {
                 break;
             }
@@ -156,7 +156,7 @@ class PositionCalculator {
             // whitespace, comma, parenthesis, digit or letter, end_of_string
             // an operator should not be surrounded by another operator
 
-            if ($expr_type === 'operator') {
+            if (in_array($expr_type,array('operator','column-list'),true)) {
 
                 $ok = ($before === "" || in_array($before, self::$allowedOnOperator, true))
                     || (strtolower($before) >= 'a' && strtolower($before) <= 'z');

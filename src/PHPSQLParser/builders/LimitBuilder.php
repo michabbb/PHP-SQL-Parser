@@ -42,9 +42,6 @@
 namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/Builder.php';
-
 /**
  * This class implements the builder LIMIT statement. 
  * You can overwrite all functions to achieve another handling.
@@ -56,7 +53,7 @@ require_once dirname(__FILE__) . '/Builder.php';
 class LimitBuilder implements Builder {
 
     public function build(array $parsed) {
-        $sql = ($parsed['offset'] ? $parsed['offset'] . ", " : "") . $parsed['rowcount'];
+        $sql = ($parsed['rowcount']) . ($parsed['offset'] ? " OFFSET " . $parsed['offset'] : "");
         if ($sql === "") {
             throw new UnableToCreateSQLException('LIMIT', 'rowcount', $parsed, 'rowcount');
         }

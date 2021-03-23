@@ -40,7 +40,6 @@
  */
 
 namespace PHPSQLParser\processors;
-require_once dirname(__FILE__) . '/InsertProcessor.php';
 
 /**
  * This class processes the REPLACE statements.
@@ -51,8 +50,8 @@ require_once dirname(__FILE__) . '/InsertProcessor.php';
  */
 class ReplaceProcessor extends InsertProcessor {
 
-    public function process($tokenList) {
-        return parent::process($tokenList, 'REPLACE');
+    public function process($tokenList, $token_category = 'REPLACE') {
+        return parent::process($tokenList, $token_category);
     }
 
 }

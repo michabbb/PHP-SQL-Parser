@@ -42,10 +42,6 @@
 namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/RecordBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
-
 /**
  * This class implements the builder for the VALUES part of INSERT statement. 
  * You can overwrite all functions to achieve another handling.
@@ -71,10 +67,13 @@ class ValuesBuilder implements Builder {
                 throw new UnableToCreateSQLException('VALUES', $k, $v, 'expr_type');
             }
 
-            $sql .= ", ";
+            $sql .= $this->getRecordDelimiter($v);
         }
-        $sql = substr($sql, 0, -2);
-        return "VALUES " . $sql;
+        return "VALUES " . trim($sql);
+    }
+
+    protected function getRecordDelimiter($parsed) {
+        return empty($parsed['delim']) ? ' ' : $parsed['delim'] . ' ';
     }
 }
 ?>

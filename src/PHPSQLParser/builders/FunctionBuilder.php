@@ -7,7 +7,7 @@
  * PHP version 5
  *
  * LICENSE:
- * Copyright (c) 2010-2014 Justin Swanhart and André Rothe
+ * Copyright (c) 2010-2015 Justin Swanhart and André Rothe
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  * @author    André Rothe <andre.rothe@phosco.info>
- * @copyright 2010-2014 Justin Swanhart and André Rothe
+ * @copyright 2010-2015 Justin Swanhart and André Rothe
  * @license   http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
  * @version   SVN: $Id$
  * 
@@ -42,17 +42,6 @@
 namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 use PHPSQLParser\utils\ExpressionType;
-
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-require_once dirname(__FILE__) . '/AliasBuilder.php';
-require_once dirname(__FILE__) . '/ColumnReferenceBuilder.php';
-require_once dirname(__FILE__) . '/ConstantBuilder.php';
-require_once dirname(__FILE__) . '/FunctionBuilder.php';
-require_once dirname(__FILE__) . '/ReservedBuilder.php';
-require_once dirname(__FILE__) . '/SelectExpressionBuilder.php';
-require_once dirname(__FILE__) . '/SelectBracketExpressionBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
 
 /**
  * This class implements the builder for function calls. 
@@ -98,7 +87,12 @@ class FunctionBuilder implements Builder {
         $builder = new SelectBracketExpressionBuilder();
         return $builder->build($parsed);
     }
-
+    
+    protected function buildSubQuery($parsed) {
+        $builder = new SubQueryBuilder();
+        return $builder->build($parsed);
+    }
+    
     public function build(array $parsed) {
         if (($parsed['expr_type'] !== ExpressionType::AGGREGATE_FUNCTION)
             && ($parsed['expr_type'] !== ExpressionType::SIMPLE_FUNCTION)
@@ -107,7 +101,7 @@ class FunctionBuilder implements Builder {
         }
 
         if ($parsed['sub_tree'] === false) {
-            return $parsed['base_expr'] . "()";
+            return $parsed['base_expr'] . "()" . $this->buildAlias($parsed);
         }
 
         $sql = "";
@@ -115,6 +109,7 @@ class FunctionBuilder implements Builder {
             $len = strlen($sql);
             $sql .= $this->build($v);
             $sql .= $this->buildConstant($v);
+            $sql .= $this->buildSubQuery($v);
             $sql .= $this->buildColRef($v);
             $sql .= $this->buildReserved($v);
             $sql .= $this->buildSelectBracketExpression($v);

@@ -42,17 +42,12 @@
 namespace PHPSQLParser\processors;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/AbstractProcessor.php';
-require_once dirname(__FILE__) . '/CreateDefinitionProcessor.php';
-require_once dirname(__FILE__) . '/PartitionOptionsProcessor.php';
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-
 /**
  * This class processes the TABLE statements.
  *
  * @author  André Rothe <andre.rothe@phosco.info>
  * @license http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
- *  
+ *
  */
 class TableProcessor extends AbstractProcessor {
 
@@ -69,12 +64,12 @@ class TableProcessor extends AbstractProcessor {
     }
 
     protected function processPartitionOptions($tokens) {
-        $processor = new PartitionOptionsProcessor();
+        $processor = new PartitionOptionsProcessor($this->options);
         return $processor->process($tokens);
     }
 
     protected function processCreateDefinition($tokens) {
-        $processor = new CreateDefinitionProcessor();
+        $processor = new CreateDefinitionProcessor($this->options);
         return $processor->process($tokens);
     }
 
@@ -160,6 +155,7 @@ class TableProcessor extends AbstractProcessor {
                 break;
 
             case 'SET':
+            case 'CHARSET':
                 if ($prevCategory === 'TABLE_OPTION') {
                     // add it to a previous CHARACTER
                     $expr[] = $this->getReservedType($trim);
@@ -169,7 +165,7 @@ class TableProcessor extends AbstractProcessor {
                 break;
 
             case 'COLLATE':
-                if ($prevCategory === 'TABLE_OPTION') {
+                if ($prevCategory === 'TABLE_OPTION' || $prevCategory === 'CREATE_DEF') {
                     // add it to the previous DEFAULT
                     $expr[] = $this->getReservedType($trim);
                     $currCategory = 'COLLATE';

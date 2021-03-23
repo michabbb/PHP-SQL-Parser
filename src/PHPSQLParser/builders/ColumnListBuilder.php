@@ -43,11 +43,6 @@ namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/IndexColumnBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-
 /**
  * This class implements the builder for column-list parts of CREATE TABLE. 
  * You can overwrite all functions to achieve another handling.
@@ -63,7 +58,12 @@ class ColumnListBuilder implements Builder {
         return $builder->build($parsed);
     }
 
-    public function build(array $parsed, $delim = ' ') {
+    protected function buildColumnReference($parsed) {
+        $builder = new ColumnReferenceBuilder();
+        return $builder->build($parsed);
+    }
+    
+    public function build(array $parsed, $delim = ', ') {
         if ($parsed['expr_type'] !== ExpressionType::COLUMN_LIST) {
             return '';
         }
@@ -71,6 +71,7 @@ class ColumnListBuilder implements Builder {
         foreach ($parsed['sub_tree'] as $k => $v) {
             $len = strlen($sql);
             $sql .= $this->buildIndexColumn($v);
+            $sql .= $this->buildColumnReference($v);
 
             if ($len == strlen($sql)) {
                 throw new UnableToCreateSQLException('CREATE TABLE column-list subtree', $k, $v, 'expr_type');

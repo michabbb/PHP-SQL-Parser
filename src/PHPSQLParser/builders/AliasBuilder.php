@@ -40,7 +40,6 @@
  */
 
 namespace PHPSQLParser\builders;
-require_once dirname(__FILE__) . '/Builder.php';
 
 /**
  * This class implements the builder for aliases. 
@@ -62,7 +61,7 @@ class AliasBuilder implements Builder {
         }
         $sql = "";
         if ($parsed['alias']['as']) {
-            $sql .= " as";
+            $sql .= " AS";
         }
         $sql .= " " . $parsed['alias']['name'];
         return $sql;

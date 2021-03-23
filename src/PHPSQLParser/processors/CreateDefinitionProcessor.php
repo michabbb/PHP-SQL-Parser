@@ -42,39 +42,32 @@
 namespace PHPSQLParser\processors;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/AbstractProcessor.php';
-require_once dirname(__FILE__) . '/ColumnDefinitionProcessor.php';
-require_once dirname(__FILE__) . '/IndexColumnListProcessor.php';
-require_once dirname(__FILE__) . '/ReferenceDefinitionProcessor.php';
-require_once dirname(__FILE__) . '/ExpressionListProcessor.php';
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-
 /**
  * This class processes the create definition of the TABLE statements.
  *
  * @author  André Rothe <andre.rothe@phosco.info>
  * @license http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
- *  
+ *
  */
 class CreateDefinitionProcessor extends AbstractProcessor {
 
     protected function processExpressionList($parsed) {
-        $processor = new ExpressionListProcessor();
+        $processor = new ExpressionListProcessor($this->options);
         return $processor->process($parsed);
     }
 
     protected function processIndexColumnList($parsed) {
-        $processor = new IndexColumnListProcessor();
+        $processor = new IndexColumnListProcessor($this->options);
         return $processor->process($parsed);
     }
 
     protected function processColumnDefinition($parsed) {
-        $processor = new ColumnDefinitionProcessor();
+        $processor = new ColumnDefinitionProcessor($this->options);
         return $processor->process($parsed);
     }
 
     protected function processReferenceDefinition($parsed) {
-        $processor = new ReferenceDefinitionProcessor();
+        $processor = new ReferenceDefinitionProcessor($this->options);
         return $processor->process($parsed);
     }
 
@@ -162,7 +155,7 @@ class CreateDefinitionProcessor extends AbstractProcessor {
                 break;
 
             case 'UNIQUE':
-                if ($prevCategory === '' || $prevCategory === 'CONSTRAINT') {
+                if ($prevCategory === '' || $prevCategory === 'CONSTRAINT' || $prevCategory === 'INDEX_COL_LIST') {
                     // next one is KEY
                     $expr[] = array('expr_type' => ExpressionType::UNIQUE_IDX, 'base_expr' => $trim);
                     $currCategory = $upper;

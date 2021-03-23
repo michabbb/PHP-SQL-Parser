@@ -42,9 +42,6 @@
 namespace PHPSQLParser\processors;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-require_once dirname(__FILE__) . '/AbstractProcessor.php';
-
 /**
  * This class processes the DROP statements.
  *
@@ -80,7 +77,12 @@ class DropProcessor extends AbstractProcessor {
                 }
                 $base_expr = '';
                 break;
-
+            case 'INDEX':
+	            if ( $objectType === '' ) {
+		            $objectType = constant( 'PHPSQLParser\utils\ExpressionType::' . $upper );
+	            }
+	            $base_expr = '';
+	            break;
             case 'IF':
             case 'EXISTS':
                 $exists = true;

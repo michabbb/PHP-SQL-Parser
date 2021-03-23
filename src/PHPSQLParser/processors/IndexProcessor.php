@@ -42,16 +42,12 @@
 namespace PHPSQLParser\processors;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/AbstractProcessor.php';
-require_once dirname(__FILE__) . '/IndexColumnListProcessor.php';
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-
 /**
  * This class processes the INDEX statements.
  *
  * @author  André Rothe <andre.rothe@phosco.info>
  * @license http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
- *  
+ *
  */
 class IndexProcessor extends AbstractProcessor {
 
@@ -68,7 +64,7 @@ class IndexProcessor extends AbstractProcessor {
     }
 
     protected function processIndexColumnList($parsed) {
-        $processor = new IndexColumnListProcessor();
+        $processor = new IndexColumnListProcessor($this->options);
         return $processor->process($parsed);
     }
 

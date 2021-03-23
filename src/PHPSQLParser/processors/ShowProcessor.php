@@ -31,27 +31,24 @@
  */
 
 namespace PHPSQLParser\processors;
+use PHPSQLParser\Options;
 use PHPSQLParser\utils\ExpressionType;
 use PHPSQLParser\utils\PHPSQLParserConstants;
 
-require_once(dirname(__FILE__) . '/../utils/PHPSQLParserConstants.php');
-require_once(dirname(__FILE__) . '/../utils/ExpressionType.php');
-require_once(dirname(__FILE__) . '/LimitProcessor.php');
-require_once(dirname(__FILE__) . '/AbstractProcessor.php');
-
 /**
- * 
+ *
  * This class processes the SHOW statements.
- * 
+ *
  * @author arothe
- * 
+ *
  */
 class ShowProcessor extends AbstractProcessor {
 
     private $limitProcessor;
 
-    public function __construct() {
-        $this->limitProcessor = new LimitProcessor();
+    public function __construct(Options $options) {
+        parent::__construct($options);
+        $this->limitProcessor = new LimitProcessor($options);
     }
 
     public function process($tokens) {
@@ -71,13 +68,14 @@ class ShowProcessor extends AbstractProcessor {
             case 'FROM':
                 $resultList[] = array('expr_type' => ExpressionType::RESERVED, 'base_expr' => trim($token));
                 if ($prev === 'INDEX' || $prev === 'COLUMNS') {
-                    continue;
+                    break;
                 }
                 $category = $upper;
                 break;
 
             case 'CREATE':
             case 'DATABASE':
+            case 'SCHEMA':
             case 'FUNCTION':
             case 'PROCEDURE':
             case 'ENGINE':
@@ -103,6 +101,7 @@ class ShowProcessor extends AbstractProcessor {
             case 'TRIGGERS':
             case 'VARIABLES':
             case 'DATABASES':
+            case 'SCHEMAS':
             case 'ERRORS':
             case 'TABLES':
             case 'WARNINGS':
@@ -124,6 +123,7 @@ class ShowProcessor extends AbstractProcessor {
                     $resultList[] = $limit;
                     break;
                 case 'FROM':
+                case 'SCHEMA':
                 case 'DATABASE':
                     $resultList[] = array('expr_type' => ExpressionType::DATABASE, 'name' => $token,
                                           'no_quotes' => $this->revokeQuotation($token), 'base_expr' => $token);

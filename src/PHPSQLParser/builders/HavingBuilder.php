@@ -42,12 +42,6 @@
 namespace PHPSQLParser\builders;
 use PHPSQLParser\exceptions\UnableToCreateSQLException;
 
-require_once dirname(__FILE__) . '/../exceptions/UnableToCreateSQLException.php';
-require_once dirname(__FILE__) . '/HavingExpressionBuilder.php';
-require_once dirname(__FILE__) . '/HavingBracketExpressionBuilder.php';
-require_once dirname(__FILE__) . '/WhereBuilder.php';
-require_once dirname(__FILE__) . '/Builder.php';
-
 /**
  * This class implements the builder for the HAVING part. 
  * You can overwrite all functions to achieve another handling.
@@ -59,7 +53,12 @@ require_once dirname(__FILE__) . '/Builder.php';
  */
 class HavingBuilder extends WhereBuilder {
 
-    protected function buildHavingExpression($parsed) {
+    protected function buildAliasReference($parsed) {
+        $builder = new AliasReferenceBuilder();
+        return $builder->build($parsed);
+    }
+	
+	protected function buildHavingExpression($parsed) {
         $builder = new HavingExpressionBuilder();
         return $builder->build($parsed);
     }
@@ -74,6 +73,7 @@ class HavingBuilder extends WhereBuilder {
         foreach ($parsed as $k => $v) {
             $len = strlen($sql);
 
+            $sql .= $this->buildAliasReference($v);
             $sql .= $this->buildOperator($v);
             $sql .= $this->buildConstant($v);
             $sql .= $this->buildColRef($v);

@@ -42,27 +42,22 @@
 namespace PHPSQLParser\processors;
 use PHPSQLParser\utils\ExpressionType;
 
-require_once dirname(__FILE__) . '/../utils/ExpressionType.php';
-require_once dirname(__FILE__) . '/RecordProcessor.php';
-require_once dirname(__FILE__) . '/ExpressionListProcessor.php';
-require_once dirname(__FILE__) . '/AbstractProcessor.php';
-
 /**
  * This class processes the VALUES statements.
  *
  * @author  André Rothe <andre.rothe@phosco.info>
  * @license http://www.debian.org/misc/bsd.license  BSD License (3 Clause)
- *  
+ *
  */
 class ValuesProcessor extends AbstractProcessor {
 
     protected function processExpressionList($unparsed) {
-        $processor = new ExpressionListProcessor();
+        $processor = new ExpressionListProcessor($this->options);
         return $processor->process($unparsed);
     }
 
     protected function processRecord($unparsed) {
-        $processor = new RecordProcessor();
+        $processor = new RecordProcessor($this->options);
         return $processor->process($unparsed);
     }
 
@@ -73,8 +68,13 @@ class ValuesProcessor extends AbstractProcessor {
         $base_expr = '';
 
         foreach ($tokens['VALUES'] as $k => $v) {
-            $base_expr .= $v;
-            $trim = trim($v);
+	        if ($this->isCommentToken($v)) {
+		        $parsed[] = parent::processComment($v);
+		        continue;
+	        }
+
+	        $base_expr .= $v;
+	        $trim = trim($v);
 
             if ($this->isWhitespaceToken($v)) {
                 continue;
